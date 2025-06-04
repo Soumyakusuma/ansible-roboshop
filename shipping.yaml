@@ -10,21 +10,21 @@
         - maven
         - mysql
 
-    - name: create roboshop cart
+    - name: create roboshop shipping
       ansible.builtin.user:
         name: roboshop
         shell: /sbin/nologin
         system: true
         home: /app
 
-    - name: download the cart
+    - name: download the shipping
       ansible.builtin.get_url:
-        url: https://roboshop-artifacts.s3.amazonaws.com/cart-v3.zip 
-        dest: /tmp/cart.zip
+        url: https://roboshop-artifacts.s3.amazonaws.com/shipping-v3.zip 
+        dest: /tmp/shipping.zip
 
-    - name: extract cart code
+    - name: extract shipping code
       ansible.builtin.unarchive:
-        src: /tmp/cart.zip
+        src: /tmp/shipping.zip
         dest: /app
         remote_src: yes
     
@@ -38,10 +38,10 @@
       args:
         chdir: /app
       
-    - name: copy cart service
+    - name: copy shipping service
       ansible.builtin.copy:
-        src: cart.service
-        dest: /etc/systemd/system/cart.service
+        src: shipping.service
+        dest: /etc/systemd/system/shipping.service
     
     - name: daemon reload the system service
       ansible.builtin.systemd_service:
@@ -49,14 +49,27 @@
     
     - name: enable and start the system service
       ansible.builtin.service:
-        name: catalogue
+        name: shipping
         state: started
         enabled: yes
 
-    - name: loading schema
-      ansible.builtin.command:  mysql -h <MYSQL-SERVER-IPADDRESS> -uroot -pRoboShop@1 < "{{ item }}"
-        loop: 
-        
+    - name: import data
+      community.mysql.mysql_db:
+        name: all
+        login_user: root
+        login_password: RoboShop@1
+        login_host: mysql.pract.site
+        state: import
+        target: "{{ item }}"
+      loop:
+      - /app/db/schema.sql
+      - /app/db/app-user.sql
+      - /app/db/master-data.sql
 
+    - name: restart shipping
+      ansible.builtin.service:
+        state: restarted
+        name: shipping
+    
 
 
