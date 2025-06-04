@@ -1,5 +1,5 @@
 - name: configure shipping
-  hosts: user
+  hosts: shipping
   become: yes
   tasks:
     - name: install java and python

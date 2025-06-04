@@ -1,5 +1,5 @@
-- name: configure shipping
-  hosts: shipping
+- name: configure payment
+  hosts: payment
   become: yes
   tasks:
     - name: install python
