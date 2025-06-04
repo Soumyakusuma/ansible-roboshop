@@ -14,7 +14,7 @@
         state: installed
 
     - name: create roboshop cart
-      ansible.builtin.cart:
+      ansible.builtin.user:
         name: roboshop
         shell: /sbin/nologin
         system: true
